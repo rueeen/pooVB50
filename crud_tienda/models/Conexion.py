@@ -28,6 +28,19 @@ class Conexion:
         return False
     
     def listar(self, sql:str):
+        '''
+        Este metodo devuele una lista de diccionarios
+        [{codigo:1111, nombre:'lavadora', precio:35000, stock:3}, {codigo:1112, nombre:'Television', precio:45000, stock:3}]
+        '''
         cursor = self.__conn.cursor(dictionary=True)
         cursor.execute(sql)
         return cursor.fetchall()
+    
+    def listar_uno(self, sql:str, datos=None):
+        '''
+        Este metodo devuele un diccionario
+        {codigo:1111, nombre:'lavadora', precio:35000, stock:3}
+        '''
+        cursor = self.__conn.cursor(dictionary=True)
+        cursor.execute(sql, datos)
+        return cursor.fetchone()

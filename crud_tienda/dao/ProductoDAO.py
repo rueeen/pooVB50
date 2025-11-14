@@ -23,3 +23,28 @@ class ProductoDAO:
             print(f'Precio: {producto["precio"]}')
             print(f'Stock: {producto["stock"]}')
             print('*'*50)
+            
+    def validar_codigo(self):
+        sql = 'SELECT * FROM producto WHERE codigo = %s'
+        datos = (self.__producto.codigo, )
+        # print(datos)
+        producto = self.__conexion.listar_uno(sql, datos)
+        if producto is None:
+            return False # early return
+        return True
+    
+    def actualizar_producto(self):
+        sql = '''UPDATE producto SET nombre = %s, precio = %s, stock = %s WHERE codigo = %s'''
+        datos = (self.__producto.nombre, self.__producto.precio, self.__producto.stock, self.__producto.codigo)
+        if self.__conexion.ejecutar(sql, datos):
+            print('Producto actualizado')
+        else:
+            print('Produto no se logro actualizar')
+            
+    def eliminar_producto(self):
+        sql = 'DELETE FROM producto WHERE codigo = %s'
+        dato = (self.__producto.codigo,)
+        if self.__conexion.ejecutar(sql, dato):
+            print('Producto eliminado')
+        else:
+            print('Produto no se logro eliminar')
