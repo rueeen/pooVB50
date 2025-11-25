@@ -1,7 +1,7 @@
 class Persona:
     def __init__(self, rut:str = None, nombre:str = None, direccion:str = None):
         self.__rut = rut
-        self.__nombre = nombre
+        self.__nombre = self.validar_nombre(nombre)
         self.__direccion = direccion
         
     @property
@@ -27,3 +27,13 @@ class Persona:
     @direccion.setter
     def direccion(self, value):
         self.__direccion = value
+        
+    def validar_nombre(self, nombre:str):
+        if nombre is None:
+            return
+        
+        # "    ".strip() -> ""
+        if nombre.strip() == "":
+            raise ValueError("Nombre no puede ser vacio")
+        
+        return nombre
