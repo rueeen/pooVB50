@@ -58,31 +58,38 @@ def crear_trabajador():
     finally:
         if dao is not None:
             dao.cerrar_dao()
+            
 def iniciar_sesion():
     print('==== Datos de usuario ====')
-    usuario = input('Ingrese su usuario: ').lower()
+    usuario = input('Ingrese su usuario: ').strip().lower()
     password = input('Ingrese su password: ')
     
-    trabajador = None
-    
+    # 1) Validaciones del modelo (ValueError)
     try:
-        # Instanciando objeto tipo trabajador
         trabajador = Trabajador(usuario=usuario, password=password)
     except ValueError as e:
-        print(e)
+        print(f"Error en los datos ingresados: {e}")
         return
-        
+
+    dao = None
     try:
-        # Instanciamos objeto dao para trabajador
+        # 2) DAO y acceso a BD
         dao = TrabajadorDAO(trabajador)
         if dao.iniciar_sesion():
+            print(f"\nInicio de sesión exitoso. Bienvenido {trabajador.nombre}!")
+            input("Presione Enter para ir al menú principal...")
             menu_principal(trabajador)
         else:
-            print('Error en datos, intente nuevamente.')
-    except:
-        print('Error generico')
+            print('Usuario o contraseña incorrectos, intente nuevamente.')
+    except mysql.connector.Error as e:
+        # Errores propiamente de MySQL (conexión, query, etc.)
+        print(f"Error de base de datos al iniciar sesión: {e}")
+    except Exception as e:
+        # Cualquier cosa inesperada (bug de código, etc.)
+        print(f"Se produjo un error inesperado al iniciar sesión: {e}")
     finally:
-        dao.cerrar_dao()
+        if dao is not None:
+            dao.cerrar_dao()
 
 def menu_principal(trabajador: Trabajador):
     while True:
