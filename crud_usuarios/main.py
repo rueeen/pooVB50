@@ -11,29 +11,53 @@ def crear_trabajador():
     direccion = input('Ingrese direccion: ')
     usuario = input('Ingrese usuario: ')
     password = input('Ingrese password: ')
-    sueldo = input('Ingrese sueldo: ')
-    # Hacer consulta en bd para roles 
+    sueldo_str = input('Ingrese sueldo: ')
+    
     print('2. Administrador')
     print('3. Trabajador')
-    rol = input('Ingrese rol: ')
-    
+    rol_str = input('Ingrese rol: ')
+
     try:
-        trabajador = Trabajador(rut=rut, nombre=nombre, direccion=direccion, usuario=usuario, password=password, sueldo=sueldo, id=rol)
-    except ValueError as e:
-        print(e)
+        sueldo = int(sueldo_str)
+    except ValueError:
+        print("El sueldo debe ser un número entero.")
         return
-    
+
+    try:
+        rol = int(rol_str)
+    except ValueError:
+        print("El rol debe ser un número entero (2 o 3).")
+        return
+
+    # --- Validaciones del modelo (ValueError del modelo) ---
+    try:
+        trabajador = Trabajador(
+            rut=rut,
+            nombre=nombre,
+            direccion=direccion,
+            usuario=usuario,
+            password=password,
+            sueldo=sueldo,
+            id=rol
+        )
+    except ValueError as e:
+        # Aquí llegan las validaciones de Persona/Trabajador (nombre vacío, usuario inválido, etc.)
+        print(f"Error en datos del trabajador: {e}")
+        return
+
+    dao = None
     try:
         dao = TrabajadorDAO(trabajador)
         dao.crear_trabajador()
-    except mysql.connector.errors as e:
-        print(e)
-    except:
-        print('Error al registrar trabajador')
+    except mysql.connector.Error as e:
+        # Excepción específica de mysql.connector
+        print(f"Error de base de datos al registrar trabajador: {e}")
+    except Exception as e:
+        # Cualquier otro error INESPERADO
+        print(f"Error inesperado al registrar trabajador: {e}")
     finally:
         if dao is not None:
             dao.cerrar_dao()
-
 def iniciar_sesion():
     print('==== Datos de usuario ====')
     usuario = input('Ingrese su usuario: ').lower()

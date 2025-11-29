@@ -3,7 +3,7 @@ from models.Conexion import Conexion
 from models.Trabajador import Trabajador
 
 class TrabajadorDAO:
-    def __init__(self, trabajador:Trabajador):
+    def __init__(self, trabajador: Trabajador):
         self.__conexion = Conexion()
         self.__trabajador = trabajador
         
@@ -12,9 +12,13 @@ class TrabajadorDAO:
         SELECT p.rut, p.nombre, t.sueldo, p.direccion, t.id
         FROM persona p JOIN trabajador t 
         ON p.rut = t.rut
-        WHERE usuario = %s AND password = %s'''
+        WHERE usuario = %s AND password = %s
+        '''
         try:
-            datos = self.__conexion.listar_uno(sql, (self.__trabajador.usuario, self.__trabajador.password))
+            datos = self.__conexion.listar_uno(
+                sql, 
+                (self.__trabajador.usuario, self.__trabajador.password)
+            )
             if datos:
                 self.__trabajador.rut = datos['rut']
                 self.__trabajador.sueldo = datos['sueldo']
@@ -23,23 +27,35 @@ class TrabajadorDAO:
                 self.__trabajador.id = datos['id']
                 return True
             return False
-        except:
-            print('Error en la consulta')
-    
-    def cerrar_dao(self):
-        self.__conexion.cerrar_conexion()
-        
+        except mysql.connector.Error as e:
+            print(f"Error al iniciar sesión en la base de datos: {e}")
+            return False
+
     def crear_trabajador(self):
-        sql = 'INSERT INTO persona(rut, nombre, direccion) VALUES (%s, %s, %s)'
+        sql_persona = 'INSERT INTO persona(rut, nombre, direccion) VALUES (%s, %s, %s)'
+        sql_trabajador = '''
+            INSERT INTO trabajador(rut, usuario, id, password, sueldo) 
+            VALUES (%s, %s, %s, %s, %s)
+        '''
         try:
-            datos = (self.__trabajador.rut, self.__trabajador.nombre, self.__trabajador.direccion)
-            if self.__conexion.ejecutar(sql, datos):
-                sql = 'INSERT INTO trabajador(rut, usuario, id, password, sueldo) VALUES (%s, %s, %s, %s, %s)'
-                datos = (self.__trabajador.rut, self.__trabajador.usuario, self.__trabajador.id, self.__trabajador.password, self.__trabajador.sueldo)
-                if self.__conexion.ejecutar(sql, datos):
-                    print('Se creo trabajador')
+            datos_persona = (
+                self.__trabajador.rut,
+                self.__trabajador.nombre,
+                self.__trabajador.direccion
+            )
+            if self.__conexion.ejecutar(sql_persona, datos_persona):
+                datos_trabajador = (
+                    self.__trabajador.rut,
+                    self.__trabajador.usuario,
+                    self.__trabajador.id,
+                    self.__trabajador.password,
+                    self.__trabajador.sueldo
+                )
+                if self.__conexion.ejecutar(sql_trabajador, datos_trabajador):
+                    print('Se creó trabajador')
                 else:
-                    print('No se logro crear trabajador')
-        except mysql.connector.errors as e:
-            print(f'{e}')
-            
+                    print('No se logró crear trabajador (tabla trabajador)')
+            else:
+                print('No se logró crear persona (tabla persona)')
+        except mysql.connector.Error as e:
+            print(f'Error de base de datos al crear trabajador: {e}')
